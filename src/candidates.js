@@ -1,4 +1,4 @@
-const Candidate = () => {
+const Candidates = () => {
   return (
     <div >
     This is candidate page
@@ -6,4 +6,4 @@ const Candidate = () => {
   );
 };
 
-export default Candidate;
+export default Candidates;

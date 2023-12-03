@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const Party = () => {
+const Parties = () => {
   const [partyList, setPartyList] = useState([]);
   
   function fetchData(url) {
@@ -28,13 +28,13 @@ const Party = () => {
       <button type="button" className="btn btn-primary">Add Party</button>
       <div className="list-group">
         {partyList.map((party) => (
-          <a href="#" id={party.id}>
+          <div id={party.id} key={party.id}>
             {party.name} - {party.symbol}
-          </a>
+          </div>
         ))}
       </div>
     </div>
   );
 };
 
-export default Party;
+export default Parties;
