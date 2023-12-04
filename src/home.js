@@ -1,7 +1,7 @@
 const Home = () => {
   return (
     <div >
-    This is Home Page
+    Welcome To The Voting System
     </div>
   );
 };
