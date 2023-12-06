@@ -2,9 +2,25 @@ import { useEffect, useState } from "react";
 
 const Parties = () => {
   const [partyList, setPartyList] = useState([]);
-  const [partyName, setPartyName] = useState("");
-  const [partySymbol, setPartySymbol] = useState("");
-  const [partyStatus, setPartyStatus] = useState(false);
+  const [partyForm, setPartyForm] = useState({
+    id: "",
+    name: "",
+    symbol: "",
+    status: false,
+  });
+  const [requestType, setRequestType] = useState("");
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setPartyForm((prevFormData) => ({ ...prevFormData, [name]: value }));
+  };
+
+  const setRequiredData = (reqType, party) => {
+    if (party != null) {
+      setPartyForm(party); 
+    }
+    setRequestType(reqType);
+  };
 
   function fetchData(url) {
     fetch(url)
@@ -36,15 +52,18 @@ const Parties = () => {
   }
 
   function handleAddParty(e) {
-    e.preventDefault();
+    //e.preventDefault();
     let url = "http://localhost:8080/partydetail";
-    let obj = {
-      name: partyName,
-      symbol: partySymbol,
-      status: partyStatus,
-    };
-    restCall(url, "POST", obj);
+    console.log("Payload:", partyForm);
+    console.log("requestType: ", requestType);
+    restCall(url, requestType, partyForm);
     document.getElementById("add-party-form").reset();
+  }
+
+  function deleteParty(id) {
+    let url = "http://localhost:8080/partydetail?id=" + id;
+    restCall(url, "DELETE", null);
+    window.location.reload();
   }
 
   useEffect(() => {
@@ -59,21 +78,25 @@ const Parties = () => {
         className="btn btn-primary"
         data-toggle="modal"
         data-target="#exampleModal"
+        onClick={() => setRequiredData("POST", null)}
       >
         Add Party
       </button>
       <div className="list-group">
         {partyList.map((party) => (
           <div id={party.id} key={party.id}>
-            Party: {party.name}, Symbol: {party.symbol}, Status: {String(party.status)}
-            {/* <button
+            Party: {party.name}, Symbol: {party.symbol}, Status:{" "}
+            {String(party.status)}
+            <button
               type="button"
               className="btn btn-primary"
               data-toggle="modal"
               data-target="#exampleModal"
+              onClick={() => setRequiredData("PUT", party)}
             >
               Edit
-            </button> */}
+            </button>
+            <button type="button"className="btn btn-primary" onClick={()=>deleteParty(party.id)}>delete</button>
           </div>
         ))}
       </div>
@@ -98,28 +121,40 @@ const Parties = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form
-                id="add-party-form"
-                onSubmit={(event) => handleAddParty(event)}
-              >
+              <form id="add-party-form" onSubmit={(e) => handleAddParty(e)}>
                 {/* <label for="party-name" class="form-label">Party Name</label> */}
                 <input
                   className="form-control"
-                  type="text"
-                  value={partyName}
-                  placeholder="partyName"
-                  onChange={(e) => setPartyName(e.target.value)}
+                  type="hidden"
+                  id="id"
+                  name="id"
+                  value={partyForm.id}
+                  onChange={handleChange}
                 />
                 <input
                   className="form-control"
                   type="text"
-                  value={partySymbol}
-                  placeholder="partySymbol"
-                  onChange={(e) => setPartySymbol(e.target.value)}
+                  id="name"
+                  name="name"
+                  value={partyForm.name}
+                  placeholder="Party Name"
+                  onChange={handleChange}
+                />
+                <input
+                  className="form-control"
+                  type="text"
+                  id="symbol"
+                  name="symbol"
+                  value={partyForm.symbol}
+                  placeholder="Party Symbol"
+                  onChange={handleChange}
                 />
                 <select
                   className="form-control"
-                  onChange={(e) => setPartyStatus(e.target.value)}
+                  id="status"
+                  name="status"
+                  value={partyForm.status}
+                  onChange={handleChange}
                 >
                   <option value={false}>false</option>
                   <option value={true}>true</option>

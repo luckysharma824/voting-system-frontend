@@ -3,11 +3,30 @@ import { useEffect, useState } from "react";
 const Elections = () => {
   const [stateList, setStateList] = useState([]);
   const [elections, setElections] = useState([]);
-  const [electionType, setElectionType] = useState("");
-  const [state, setState] = useState("");
-  const [votingStatus, setVotingStatus] = useState(false);
+
+  const [electionForm, setElectionForm] = useState({
+    id: "",
+    electionType: "",
+    state: "",
+    votingStatus: false,
+  });
+
+  const [requestType, setRequestType] = useState("");
+  
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setElectionForm((prevFormData) => ({ ...prevFormData, [name]: value }));
+  };
+
+  const setRequiredData = (reqType, election) => {
+    if (election != null) {
+      setElectionForm(election); 
+    }
+    setRequestType(reqType);
+  };
 
   const electionTypeList = ["STATE", "CENTRAL"];
+
   function fetchData(url, callback) {
     fetch(url)
       .then((response) => response.json())
@@ -34,7 +53,6 @@ const Elections = () => {
     fetchData(url, getElectionList);
   }
 
-
   function restCall(url, httpMethod, data) {
     const requestOptions = {
       method: httpMethod,
@@ -52,14 +70,11 @@ const Elections = () => {
   }
 
   function handleAddElection(e) {
-    e.preventDefault();
+    //e.preventDefault();
     let url = "http://localhost:8080/electionDetail";
-    let obj = {
-      electionType: electionType,
-      state: state,
-      votingStatus: votingStatus,
-    };
-    restCall(url, "POST", obj);
+    console.log("Payload:", electionForm);
+    console.log("requestType: ", requestType);
+    restCall(url, requestType, electionForm);
     document.getElementById("add-election-form").reset();
   }
 
@@ -70,28 +85,45 @@ const Elections = () => {
 
   return (
     <div className="container">
-       <button
+      <button
         type="button"
         className="btn btn-primary"
         data-toggle="modal"
         data-target="#addElectionModal"
+        onClick={() => setRequiredData("POST", null)}
       >
         Add Election
       </button>
-      <select className="list-group" onChange={(e) => handleStateChange(e.target.value)}>
+      <select
+        className="list-group"
+        id="statelist"
+        onChange={(e) => handleStateChange(e.target.value)}
+      >
         {stateList.map((st, index) => (
-          <option key={index} value={st} selected ={index === 0 ? "selected" : null}>
+          <option
+            key={index}
+            value={st}
+          >
             {st}
           </option>
         ))}
       </select>
       <div className="list-group">
-        {elections.map((el, index) => 
+        {elections.map((el, index) => (
           <div id={el.id} key={el.id}>
-            Election Type: {el.electionType}, Election State : {el.state}, Status: {String(el.votingStatus)} 
-            <button className=".btn" href="#" > view </button>
+            Election Type: {el.electionType}, Election State : {el.state},
+            Status: {String(el.votingStatus)}
+            <button
+              type="button"
+              className="btn btn-primary"
+              data-toggle="modal"
+              data-target="#addElectionModal"
+              onClick={() => setRequiredData("PUT", el)}
+            >
+              Edit
+            </button>
           </div>
-        )}
+        ))}
       </div>
       <div
         className="modal fade"
@@ -114,30 +146,52 @@ const Elections = () => {
               </button>
             </div>
             <div className="modal-body">
-              <form
-                id="add-election-form"
-                onSubmit={(event) => handleAddElection(event)}
-              >
+              <form id="add-election-form" onSubmit={handleAddElection}>
+                <input
+                  className="form-control"
+                  type="hidden"
+                  id="id"
+                  name="id"
+                  value={electionForm.id}
+                  onChange={handleChange}
+                />
                 <select
                   className="form-control"
-                  onChange={(e) => setElectionType(e.target.value)}
+                  id="electionType"
+                  name="electionType"
+                  value={electionForm.electionType}
+                  onChange={handleChange}
                 >
                   {electionTypeList.map((el, index) => (
-                    <option key={index} value={el} selected={index === 0 ? "selected" : null} >{el}</option>
+                    <option
+                      key={index}
+                      value={el}
+                      defaultValue={index === 0 ? "selected" : null}
+                    >
+                      {el}
+                    </option>
                   ))}
                 </select>
                 <select
                   className="form-control"
-                  onChange={(e) => setState(e.target.value)}
+                  id="state"
+                  name="state"
+                  value={electionForm.state}
+                  onChange={handleChange}
                 >
                   {stateList.map((st, index) => (
-                    <option key={index} value={st}>{st}</option>
+                    <option key={index} value={st}>
+                      {st}
+                    </option>
                   ))}
                 </select>
 
                 <select
                   className="form-control"
-                  onChange={(e) => setVotingStatus(e.target.value)}
+                  id="votingStatus"
+                  name="votingStatus"
+                  value={electionForm.votingStatus}
+                  onChange={handleChange}
                 >
                   <option value={false}>false</option>
                   <option value={true}>true</option>
