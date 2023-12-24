@@ -1,9 +1,11 @@
 const Candidates = () => {
+  
+  
   return (
-    <div >
-    This is candidate page
-    </div>
+  <div>
+
+  </div>
   );
-};
+}
 
 export default Candidates;

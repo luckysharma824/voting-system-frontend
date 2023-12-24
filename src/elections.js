@@ -42,6 +42,7 @@ const Elections = () => {
 
   function getStatesList(states) {
     setStateList(states);
+    handleStateChange(states[0]);
   }
 
   function getElectionList(elections) {
@@ -53,6 +54,17 @@ const Elections = () => {
     fetchData(url, getElectionList);
   }
 
+  function deleteElectionDetail(id) {
+    let url = "http://localhost:8080/electionDetail/" + id;
+    restCall(url, "DELETE", null);
+    removeItem(id);
+  }
+
+  const removeItem = (id) => {
+    const updatedList = elections.filter((item) => item.id !== id);
+    setElections(updatedList);
+  };
+
   function restCall(url, httpMethod, data) {
     const requestOptions = {
       method: httpMethod,
@@ -63,6 +75,7 @@ const Elections = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
+        alert(data.message);
       })
       .catch((error) => {
         console.error("Error fetching photos:", error);
@@ -70,12 +83,19 @@ const Elections = () => {
   }
 
   function handleAddElection(e) {
-    //e.preventDefault();
+    e.preventDefault();
+    if(electionForm.electionType === '' || electionForm.electionType === null) {
+      electionForm.electionType = electionTypeList[0];
+    }
+    if(electionForm.state === '' || electionForm.state === null) {
+      electionForm.state = stateList[0];
+    }
     let url = "http://localhost:8080/electionDetail";
     console.log("Payload:", electionForm);
     console.log("requestType: ", requestType);
     restCall(url, requestType, electionForm);
     document.getElementById("add-election-form").reset();
+    document.getElementById("addElectionModal").setAttribute("data-dismiss", "modal");
   }
 
   useEffect(() => {
@@ -108,12 +128,24 @@ const Elections = () => {
           </option>
         ))}
       </select>
-      <div className="list-group">
+      <table className="table table-bordered">
+      <thead>
+        <tr>
+          <td>Election Type</td>
+          <td>Status</td>
+          <td>Election State</td>
+          <td>Edit</td>
+          <td>Delete</td>
+          </tr>
+        </thead>
+        <tbody>
         {elections.map((el, index) => (
-          <div id={el.id} key={el.id}>
-            Election Type: {el.electionType}, Election State : {el.state},
-            Status: {String(el.votingStatus)}
-            <button
+          <tr id={el.id} key={el.id}>
+            <td>{el.electionType}</td>
+            <td>{el.state}</td>
+            <td>{String(el.votingStatus)}</td>
+
+            <td><button
               type="button"
               className="btn btn-primary"
               data-toggle="modal"
@@ -122,9 +154,14 @@ const Elections = () => {
             >
               Edit
             </button>
-          </div>
+            </td>
+            <td>
+            <button type="button"className="btn btn-primary" onClick={()=>deleteElectionDetail(el.id)}>delete</button>
+            </td>
+          </tr>
         ))}
-      </div>
+        </tbody>
+      </table>
       <div
         className="modal fade"
         id="addElectionModal"
@@ -159,7 +196,7 @@ const Elections = () => {
                   className="form-control"
                   id="electionType"
                   name="electionType"
-                  value={electionForm.electionType}
+                  defaultValue={electionTypeList[0]}
                   onChange={handleChange}
                 >
                   {electionTypeList.map((el, index) => (
@@ -176,7 +213,7 @@ const Elections = () => {
                   className="form-control"
                   id="state"
                   name="state"
-                  value={electionForm.state}
+                  defaultValue={stateList[0]}
                   onChange={handleChange}
                 >
                   {stateList.map((st, index) => (
@@ -190,7 +227,7 @@ const Elections = () => {
                   className="form-control"
                   id="votingStatus"
                   name="votingStatus"
-                  value={electionForm.votingStatus}
+                  defaultValue={false}
                   onChange={handleChange}
                 >
                   <option value={false}>false</option>

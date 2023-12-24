@@ -43,28 +43,35 @@ const Parties = () => {
     };
     fetch(url, requestOptions)
       .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
+      .then((res) => {
+        console.log(res);
+        alert(res.message);
       })
       .catch((error) => {
-        console.error("Error fetching photos:", error);
+        console.error("Error fetching party list:", error);
       });
   }
 
   function handleAddParty(e) {
-    //e.preventDefault();
     let url = "http://localhost:8080/partydetail";
     console.log("Payload:", partyForm);
     console.log("requestType: ", requestType);
     restCall(url, requestType, partyForm);
     document.getElementById("add-party-form").reset();
+    
+    e.preventDefault();
   }
 
   function deleteParty(id) {
     let url = "http://localhost:8080/partydetail?id=" + id;
     restCall(url, "DELETE", null);
-    window.location.reload();
+    removeItem(id);
   }
+
+  const removeItem = (id) => {
+    const updatedList = partyList.filter((item) => item.id !== id);
+    setPartyList(updatedList);
+  };
 
   useEffect(() => {
     var url = "http://localhost:8080/partydetail/all";
@@ -82,12 +89,24 @@ const Parties = () => {
       >
         Add Party
       </button>
-      <div className="list-group">
+      <table className="table table-bordered">
+        <thead>
+          <tr>
+          <td>Party Name</td>
+          <td>Symbol</td>
+          <td>Status</td>
+          <td>Edit</td>
+          <td>Delete</td>
+          </tr>
+        </thead>
+        <tbody>
         {partyList.map((party) => (
-          <div id={party.id} key={party.id}>
-            Party: {party.name}, Symbol: {party.symbol}, Status:{" "}
-            {String(party.status)}
-            <button
+          <tr id={party.id} key={party.id}>
+            <td>{party.name}</td> 
+            <td>{party.symbol}</td> 
+            <td>{" "}
+            {String(party.status)}</td>
+            <td><button
               type="button"
               className="btn btn-primary"
               data-toggle="modal"
@@ -96,10 +115,13 @@ const Parties = () => {
             >
               Edit
             </button>
-            <button type="button"className="btn btn-primary" onClick={()=>deleteParty(party.id)}>delete</button>
-          </div>
+            </td>
+            <td><button type="button"className="btn btn-primary" onClick={()=>deleteParty(party.id)}>delete</button>
+            </td>
+          </tr>
         ))}
-      </div>
+        </tbody>
+      </table>
       <div
         className="modal fade"
         id="exampleModal"
