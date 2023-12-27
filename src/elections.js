@@ -12,15 +12,19 @@ const Elections = () => {
   });
 
   const [requestType, setRequestType] = useState("");
-  
+
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setElectionForm((prevFormData) => ({ ...prevFormData, [name]: value }));
+    if (value === "") {
+      setElectionForm([]);
+    } else {
+      setElectionForm((prevFormData) => ({ ...prevFormData, [name]: value }));
+    }
   };
 
   const setRequiredData = (reqType, election) => {
     if (election != null) {
-      setElectionForm(election); 
+      setElectionForm(election);
     }
     setRequestType(reqType);
   };
@@ -42,7 +46,7 @@ const Elections = () => {
 
   function getStatesList(states) {
     setStateList(states);
-    handleStateChange(states[0]);
+    //handleStateChange(states[0]);
   }
 
   function getElectionList(elections) {
@@ -50,8 +54,12 @@ const Elections = () => {
   }
 
   function handleStateChange(state) {
-    let url = "http://localhost:8080/electionDetail/" + state;
-    fetchData(url, getElectionList);
+    if (state === "") {
+      setElections([]);
+    } else {
+      let url = "http://localhost:8080/electionDetail/" + state;
+      fetchData(url, getElectionList);
+    }
   }
 
   function deleteElectionDetail(id) {
@@ -84,10 +92,13 @@ const Elections = () => {
 
   function handleAddElection(e) {
     e.preventDefault();
-    if(electionForm.electionType === '' || electionForm.electionType === null) {
+    if (
+      electionForm.electionType === "" ||
+      electionForm.electionType === null
+    ) {
       electionForm.electionType = electionTypeList[0];
     }
-    if(electionForm.state === '' || electionForm.state === null) {
+    if (electionForm.state === "" || electionForm.state === null) {
       electionForm.state = stateList[0];
     }
     let url = "http://localhost:8080/electionDetail";
@@ -95,7 +106,9 @@ const Elections = () => {
     console.log("requestType: ", requestType);
     restCall(url, requestType, electionForm);
     document.getElementById("add-election-form").reset();
-    document.getElementById("addElectionModal").setAttribute("data-dismiss", "modal");
+    document
+      .getElementById("addElectionModal")
+      .setAttribute("data-dismiss", "modal");
   }
 
   useEffect(() => {
@@ -119,47 +132,54 @@ const Elections = () => {
         id="statelist"
         onChange={(e) => handleStateChange(e.target.value)}
       >
+        <option key="-1" value="">
+          --Please choose state--
+        </option>
         {stateList.map((st, index) => (
-          <option
-            key={index}
-            value={st}
-          >
+          <option key={index} value={st}>
             {st}
           </option>
         ))}
       </select>
       <table className="table table-bordered">
-      <thead>
-        <tr>
-          <td>Election Type</td>
-          <td>Status</td>
-          <td>Election State</td>
-          <td>Edit</td>
-          <td>Delete</td>
+        <thead>
+          <tr>
+            <td>Election Type</td>
+            <td>Election State</td>
+            <td>Status</td>
+            <td>Edit</td>
+            <td>Delete</td>
           </tr>
         </thead>
         <tbody>
-        {elections.map((el, index) => (
-          <tr id={el.id} key={el.id}>
-            <td>{el.electionType}</td>
-            <td>{el.state}</td>
-            <td>{String(el.votingStatus)}</td>
+          {elections.map((el, index) => (
+            <tr id={el.id} key={el.id}>
+              <td>{el.electionType}</td>
+              <td>{el.state}</td>
+              <td>{String(el.votingStatus)}</td>
 
-            <td><button
-              type="button"
-              className="btn btn-primary"
-              data-toggle="modal"
-              data-target="#addElectionModal"
-              onClick={() => setRequiredData("PUT", el)}
-            >
-              Edit
-            </button>
-            </td>
-            <td>
-            <button type="button"className="btn btn-primary" onClick={()=>deleteElectionDetail(el.id)}>delete</button>
-            </td>
-          </tr>
-        ))}
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-toggle="modal"
+                  data-target="#addElectionModal"
+                  onClick={() => setRequiredData("PUT", el)}
+                >
+                  Edit
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => deleteElectionDetail(el.id)}
+                >
+                  delete
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <div
@@ -199,6 +219,7 @@ const Elections = () => {
                   defaultValue={electionTypeList[0]}
                   onChange={handleChange}
                 >
+                  <option key="-1" value="">--Please Choose ElectionType--</option>
                   {electionTypeList.map((el, index) => (
                     <option
                       key={index}
@@ -216,6 +237,7 @@ const Elections = () => {
                   defaultValue={stateList[0]}
                   onChange={handleChange}
                 >
+                  <option key="-1" value="">--Please Choose State--</option>
                   {stateList.map((st, index) => (
                     <option key={index} value={st}>
                       {st}

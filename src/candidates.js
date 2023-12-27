@@ -3,8 +3,43 @@ import { useEffect, useState } from "react";
 const Candidates = () => {
   const [stateList, setStateList] = useState([]);
   const [candidates, setCandidates] = useState([]);
+  const [elections, setElections] = useState([]);
+  const [partyList, setPartyList] = useState([]);
   const [requestType, setRequestType] = useState("");
-  
+
+  const [candidateForm, setCandidateForm] = useState({
+    id: "",
+    name: "",
+    partyDetail: {
+      id: "",
+      name: "",
+      symbol: "",
+      status: false,
+    },
+    electionDetail: {
+      id: "",
+      electionType: null,
+      state: null,
+      votingStatus: "",
+    },
+  });
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    console.log("name: " + name + ", value: " + value);
+    if ("partyDetail.id" === name) {
+      let newPartyDetail = candidateForm.partyDetail;
+      newPartyDetail["id"] = value;
+      candidateForm.partyDetail = newPartyDetail;
+    } else if ("electionDetail.id" === name) {
+      let newElectionDetail = candidateForm.electionDetail;
+      newElectionDetail["id"] = value;
+      candidateForm.electionDetail = newElectionDetail;
+    } else {
+      setCandidateForm((prevFormData) => ({ ...prevFormData, [name]: value }));
+    }
+    console.log(candidateForm);
+  };
 
   function fetchData(url, callback) {
     fetch(url)
@@ -26,7 +61,7 @@ const Candidates = () => {
 
   function getStatesList(states) {
     setStateList(states);
-    handleCandidateListChange(states[0]);
+    //handleCandidateListChange(states[0]);
   }
 
   function getCandidateList(resultObj) {
@@ -34,15 +69,24 @@ const Candidates = () => {
   }
 
   function handleCandidateListChange(state) {
-    let url = "http://localhost:8080/candidate/states/" + state;
-    fetchData(url, getCandidateList);
+    if (state === "") {
+      setCandidates([]);
+    } else {
+      let url = "http://localhost:8080/candidate/states/" + state;
+      fetchData(url, getCandidateList);
+    }
   }
 
-  const setRequiredData = (reqType, candidate) => {
-    // if (candidate != null) {
-    //   setElectionForm(election); 
-    // }
+  const setRequiredData = (reqType, candidate, actionType) => {
+    console.log("on click of add and edit form: ", candidate);
+    if (candidate != null) {
+      setCandidateForm(candidate);
+    }
     setRequestType(reqType);
+    if ("ADD" === actionType) {
+      var url = "http://localhost:8080/partydetail/all";
+      fetchData(url, setPartyList);
+    }
   };
 
   function deleteCandidateDetail(id) {
@@ -55,8 +99,6 @@ const Candidates = () => {
     const updatedList = candidates.filter((item) => item.id !== id);
     setCandidates(updatedList);
   };
-
-
 
   function restCall(url, httpMethod, data) {
     const requestOptions = {
@@ -75,63 +117,97 @@ const Candidates = () => {
       });
   }
 
-  return (
-  <div className="container">
-    <select
+  function handleAddCandidate(e) {
+    e.preventDefault();
+    let url = "http://localhost:8080/candidate";
+    console.log("Payload:", candidateForm);
+    console.log("requestType: ", requestType);
+    restCall(url, requestType, candidateForm);
+    document.getElementById("add-candidate-form").reset();
+  }
+
+  function callElectionListApi(event) {
+    let state = event.target.value;
+    if (state !== "") {
+      let url = "http://localhost:8080/electionDetail/" + state;
+      fetchData(url, setElections);
+    }
+  }
+
+  return (  
+    <div className="container">
+      <button
+        type="button"
+        className="btn btn-primary"
+        data-toggle="modal"
+        data-target="#addCandidateModal"
+        onClick={() => setRequiredData("POST", null, "ADD")}
+      >
+        Add Candidate
+      </button>
+      <select
         className="list-group"
         id="statelist"
         onChange={(e) => handleCandidateListChange(e.target.value)}
       >
+        <option key="-1" value="">
+          --Please Choose State--
+        </option>
         {stateList.map((st, index) => (
-          <option
-            key={index}
-            value={st}
-          >
+          <option key={index} value={st}>
             {st}
           </option>
         ))}
       </select>
       <table className="table table-bordered">
-      <thead>
-        <tr>
-          <td>Candidate Name</td>
-          <td>Party Name</td>
-          <td>Party Symbol</td>
-          <td>Election Type</td>
-          <td>Edit</td>
-          <td>Delete</td>
+        <thead>
+          <tr>
+            <td>Candidate Name</td>
+            <td>Party Name</td>
+            <td>Party Symbol</td>
+            <td>Election Type</td>
+            <td>Edit</td>
+            <td>Delete</td>
           </tr>
         </thead>
         <tbody>
-        {candidates.map((cand, index) => (
-          <tr id={cand.id} key={cand.id}>
-            <td>{cand.name}</td>
-            <td>{cand.partyDetail.name}</td>
-            <td>{cand.partyDetail.symbol}</td>
-            <td>{cand.electionDetail.electionType}</td>
-            <td><button
-              type="button"
-              className="btn btn-primary"
-              data-toggle="modal"
-              data-target="#addElectionModal"
-              onClick={() => setRequiredData("PUT", cand)}
-            >
-              Edit
-            </button>
-            </td>
-            <td>
-            <button type="button"className="btn btn-primary" onClick={()=>deleteCandidateDetail(cand.id)}>delete</button>
-            </td>
-          </tr>
-        ))}
+          {candidates.map((cand, index) => (
+            <tr id={cand.id} key={cand.id}>
+              <td>{cand.name}</td>
+              <td>{cand.partyDetail.name}</td>
+              <td>{cand.partyDetail.symbol}</td>
+              <td>{cand.electionDetail.electionType}</td>
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-toggle="modal"
+                  data-target="#addCandidateModal"
+                  disabled={true}
+                  onClick={() => setRequiredData("PUT", cand)}
+                >
+                  Edit
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => deleteCandidateDetail(cand.id)}
+                >
+                  delete
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <div
         className="modal fade"
-        id="addElectionModal"
+        id="addCandidateModal"
         tabIndex={-1}
         role="dialog"
-        aria-labelledby="addElectionModalLabel"
+        aria-labelledby="addCandidateModalLabel"
         aria-hidden="true"
       >
         <div className="modal-dialog" role="document">
@@ -146,57 +222,74 @@ const Candidates = () => {
                 <span aria-hidden="true"></span>
               </button>
             </div>
-            {/* <div className="modal-body">
-              <form id="add-election-form" onSubmit={handleAddElection}>
+            <div className="modal-body">
+              <form id="add-candidate-form" onSubmit={handleAddCandidate}>
                 <input
                   className="form-control"
                   type="hidden"
                   id="id"
                   name="id"
-                  value={electionForm.id}
+                  value={candidateForm.id}
                   onChange={handleChange}
                 />
+
+                <input
+                  className="form-control"
+                  id="candidate_name"
+                  name="name"
+                  value={candidateForm.name}
+                  placeholder="Candidate Name"
+                  onChange={handleChange}
+                />
+
                 <select
                   className="form-control"
-                  id="electionType"
-                  name="electionType"
-                  defaultValue={electionTypeList[0]}
+                  id="partyDetail_id"
+                  name="partyDetail.id"
+                  value={candidateForm.partyDetail.id}
                   onChange={handleChange}
                 >
-                  {electionTypeList.map((el, index) => (
-                    <option
-                      key={index}
-                      value={el}
-                      defaultValue={index === 0 ? "selected" : null}
-                    >
-                      {el}
+                  <option key={-1} value={""}>
+                    --Please Choose Party Detail--
+                  </option>
+                  {partyList.map((party) => (
+                    <option key={party.id} value={party.id}>
+                      {party.name}: {party.symbol}
                     </option>
                   ))}
                 </select>
                 <select
                   className="form-control"
-                  id="state"
-                  name="state"
-                  defaultValue={stateList[0]}
-                  onChange={handleChange}
+                  id="state-list"
+                  name="states"
+                  onChange={callElectionListApi}
                 >
+                  <option key={-1} value={""}>
+                    --Please Choose State--
+                  </option>
                   {stateList.map((st, index) => (
                     <option key={index} value={st}>
                       {st}
                     </option>
                   ))}
                 </select>
-
                 <select
                   className="form-control"
-                  id="votingStatus"
-                  name="votingStatus"
-                  defaultValue={false}
+                  id="electionDetail_id"
+                  name="electionDetail.id"
+                  value={candidateForm.electionDetail.id}
                   onChange={handleChange}
                 >
-                  <option value={false}>false</option>
-                  <option value={true}>true</option>
+                  <option key={-1} value={""}>
+                    --Please Choose Election Detail--
+                  </option>
+                  {elections.map((elec) => (
+                    <option key={elec.id} value={elec.id}>
+                      {elec.electionType}: {elec.state}
+                    </option>
+                  ))}
                 </select>
+
                 <div className="modal-footer">
                   <button
                     type="button"
@@ -210,12 +303,12 @@ const Candidates = () => {
                   </button>
                 </div>
               </form>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
-  </div>
+    </div>
   );
-}
+};
 
 export default Candidates;

@@ -1,6 +1,6 @@
 const Home = () => {
   return (
-    <div >
+    <div className="text-center">
     Welcome To The Voting System
     </div>
   );
