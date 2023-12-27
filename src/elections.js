@@ -219,7 +219,9 @@ const Elections = () => {
                   defaultValue={electionTypeList[0]}
                   onChange={handleChange}
                 >
-                  <option key="-1" value="">--Please Choose ElectionType--</option>
+                  <option key="-1" value="">
+                    --Please Choose ElectionType--
+                  </option>
                   {electionTypeList.map((el, index) => (
                     <option
                       key={index}
@@ -237,7 +239,9 @@ const Elections = () => {
                   defaultValue={stateList[0]}
                   onChange={handleChange}
                 >
-                  <option key="-1" value="">--Please Choose State--</option>
+                  <option key="-1" value="">
+                    --Please Choose State--
+                  </option>
                   {stateList.map((st, index) => (
                     <option key={index} value={st}>
                       {st}

@@ -134,7 +134,7 @@ const Candidates = () => {
     }
   }
 
-  return (  
+  return (
     <div className="container">
       <button
         type="button"

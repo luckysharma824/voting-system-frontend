@@ -17,7 +17,7 @@ const Parties = () => {
 
   const setRequiredData = (reqType, party) => {
     if (party != null) {
-      setPartyForm(party); 
+      setPartyForm(party);
     }
     setRequestType(reqType);
   };
@@ -58,7 +58,7 @@ const Parties = () => {
     console.log("requestType: ", requestType);
     restCall(url, requestType, partyForm);
     document.getElementById("add-party-form").reset();
-    
+
     e.preventDefault();
   }
 
@@ -92,34 +92,41 @@ const Parties = () => {
       <table className="table table-bordered">
         <thead>
           <tr>
-          <td>Party Name</td>
-          <td>Symbol</td>
-          <td>Status</td>
-          <td>Edit</td>
-          <td>Delete</td>
+            <td>Party Name</td>
+            <td>Symbol</td>
+            <td>Status</td>
+            <td>Edit</td>
+            <td>Delete</td>
           </tr>
         </thead>
         <tbody>
-        {partyList.map((party) => (
-          <tr id={party.id} key={party.id}>
-            <td>{party.name}</td> 
-            <td>{party.symbol}</td> 
-            <td>{" "}
-            {String(party.status)}</td>
-            <td><button
-              type="button"
-              className="btn btn-primary"
-              data-toggle="modal"
-              data-target="#exampleModal"
-              onClick={() => setRequiredData("PUT", party)}
-            >
-              Edit
-            </button>
-            </td>
-            <td><button type="button"className="btn btn-primary" onClick={()=>deleteParty(party.id)}>delete</button>
-            </td>
-          </tr>
-        ))}
+          {partyList.map((party) => (
+            <tr id={party.id} key={party.id}>
+              <td>{party.name}</td>
+              <td>{party.symbol}</td>
+              <td> {String(party.status)}</td>
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  data-toggle="modal"
+                  data-target="#exampleModal"
+                  onClick={() => setRequiredData("PUT", party)}
+                >
+                  Edit
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => deleteParty(party.id)}
+                >
+                  delete
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <div
