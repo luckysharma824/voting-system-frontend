@@ -164,6 +164,7 @@ const Candidates = () => {
             <td>Party Name</td>
             <td>Party Symbol</td>
             <td>Election Type</td>
+            <td>Total Votes</td>
             <td>Edit</td>
             <td>Delete</td>
           </tr>
@@ -175,6 +176,7 @@ const Candidates = () => {
               <td>{cand.partyDetail.name}</td>
               <td>{cand.partyDetail.symbol}</td>
               <td>{cand.electionDetail.electionType}</td>
+              <td>{cand.totalVotes}</td>
               <td>
                 <button
                   type="button"
