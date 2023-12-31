@@ -83,10 +83,8 @@ const Candidates = () => {
       setCandidateForm(candidate);
     }
     setRequestType(reqType);
-    if ("ADD" === actionType) {
-      var url = "http://localhost:8080/partydetail/all";
-      fetchData(url, setPartyList);
-    }
+    var url = "http://localhost:8080/partydetail/all";
+    fetchData(url, setPartyList);
   };
 
   function deleteCandidateDetail(id) {
@@ -104,7 +102,7 @@ const Candidates = () => {
     const requestOptions = {
       method: httpMethod,
       headers: { "Content-Type": "application/json" },
-      body: data == null ? null : JSON.stringify(data),
+      body: data === null ? null : JSON.stringify(data),
     };
     fetch(url, requestOptions)
       .then((response) => response.json())
@@ -183,7 +181,7 @@ const Candidates = () => {
                   className="btn btn-primary"
                   data-toggle="modal"
                   data-target="#addCandidateModal"
-                  disabled={true}
+                  disabled={false}
                   onClick={() => setRequiredData("PUT", cand)}
                 >
                   Edit
@@ -246,12 +244,10 @@ const Candidates = () => {
                   className="form-control"
                   id="partyDetail_id"
                   name="partyDetail.id"
-                  value={candidateForm.partyDetail.id}
+                  //value={candidateForm.partyDetail.id}
                   onChange={handleChange}
                 >
-                  <option key={-1} value={""}>
-                    --Please Choose Party Detail--
-                  </option>
+                  <option value={""}>--Please Choose Party Detail--</option>
                   {partyList.map((party) => (
                     <option key={party.id} value={party.id}>
                       {party.name}: {party.symbol}
@@ -264,9 +260,7 @@ const Candidates = () => {
                   name="states"
                   onChange={callElectionListApi}
                 >
-                  <option key={-1} value={""}>
-                    --Please Choose State--
-                  </option>
+                  <option value={""}>--Please Choose State--</option>
                   {stateList.map((st, index) => (
                     <option key={index} value={st}>
                       {st}
@@ -277,12 +271,10 @@ const Candidates = () => {
                   className="form-control"
                   id="electionDetail_id"
                   name="electionDetail.id"
-                  value={candidateForm.electionDetail.id}
+                  //value={candidateForm.electionDetail.id}
                   onChange={handleChange}
                 >
-                  <option key={-1} value={""}>
-                    --Please Choose Election Detail--
-                  </option>
+                  <option value={""}>--Please Choose Election Detail--</option>
                   {elections.map((elec) => (
                     <option key={elec.id} value={elec.id}>
                       {elec.electionType}: {elec.state}
