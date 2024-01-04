@@ -35,37 +35,57 @@ const Parties = () => {
       });
   }
 
-  function restCall(url, httpMethod, data) {
+  async function restCall(url, httpMethod, data) {
     const requestOptions = {
       method: httpMethod,
       headers: { "Content-Type": "application/json" },
       body: data == null ? null : JSON.stringify(data),
     };
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((res) => {
-        console.log(res);
-        alert(res.message);
-      })
-      .catch((error) => {
-        console.error("Error fetching party list:", error);
-      });
+    try {
+      const response = await fetch(url, requestOptions);
+      const data_1 = await response.json();
+      console.log(data_1);
+      alert(data_1.message);
+      return data_1;
+    } catch (error) {
+      console.error("Error fetching party list:", error);
+    }
+    return null;
   }
 
-  function handleAddParty(e) {
+  async function handleAddParty(e) {
+    e.preventDefault();
     let url = "http://localhost:8080/partydetail";
     console.log("Payload:", partyForm);
     console.log("requestType: ", requestType);
-    restCall(url, requestType, partyForm);
+    const response = await restCall(url, requestType, partyForm);
+    if (response.isSuccess) {
+      if (requestType === "POST") {
+        console.log(response.result);
+        setPartyList((parties) => [...parties, response.result]);
+      } else {
+        updateItem(response.result);
+      }
+    }
     document.getElementById("add-party-form").reset();
-
-    e.preventDefault();
   }
 
-  function deleteParty(id) {
+  const updateItem = (party) => {
+    const updatedList = partyList.map((item) => {
+      if (item.id === party.id) {
+        item = party;
+      }
+      return item;
+    });
+    setPartyList(updatedList);
+  };
+
+  async function deleteParty(id) {
     let url = "http://localhost:8080/partydetail?id=" + id;
-    restCall(url, "DELETE", null);
-    removeItem(id);
+    const response = await restCall(url, "DELETE", null);
+    if (response.isSuccess) {
+      removeItem(id);
+    }
   }
 
   const removeItem = (id) => {

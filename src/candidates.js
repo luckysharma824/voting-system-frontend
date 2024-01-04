@@ -87,10 +87,13 @@ const Candidates = () => {
     fetchData(url, setPartyList);
   };
 
-  function deleteCandidateDetail(id) {
+  async function deleteCandidateDetail(id) {
     let url = "http://localhost:8080/candidate/" + id;
-    restCall(url, "DELETE", null);
-    removeItem(id);
+    const response = await restCall(url, "DELETE", null);
+    alert(response.message);
+    if (response.isSuccess) {
+      removeItem(id);
+    }
   }
 
   const removeItem = (id) => {
@@ -98,31 +101,53 @@ const Candidates = () => {
     setCandidates(updatedList);
   };
 
-  function restCall(url, httpMethod, data) {
+  async function restCall(url, httpMethod, data) {
     const requestOptions = {
       method: httpMethod,
       headers: { "Content-Type": "application/json" },
       body: data === null ? null : JSON.stringify(data),
     };
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        alert(data.message);
-      })
-      .catch((error) => {
-        console.error("Error fetching photos:", error);
-      });
+    try {
+      const response = await fetch(url, requestOptions);
+      const data_1 = await response.json();
+      console.log(data_1);
+      return data_1;
+    } catch (error) {
+      console.error("Error fetching party list:", error);
+    }
+    return null;
   }
 
-  function handleAddCandidate(e) {
+  async function handleAddCandidate(e) {
     e.preventDefault();
     let url = "http://localhost:8080/candidate";
     console.log("Payload:", candidateForm);
     console.log("requestType: ", requestType);
-    restCall(url, requestType, candidateForm);
+    const response = await restCall(url, requestType, candidateForm);
+    alert(response.message);
     document.getElementById("add-candidate-form").reset();
+    if (response.isSuccess) {
+      let getUrl = url + "?id=" + response.result.id;
+      const res = await restCall(getUrl, "GET", null);
+      if (requestType === "POST") {
+        console.log(response.result);
+        setCandidates((prev) => [...prev, res.result]);
+      } else {
+        console.log("updating the record: " + res.result);
+        updateItem(res.result);
+      }
+    }
   }
+
+  const updateItem = (candidate) => {
+    const updatedList = candidates.map((item) => {
+      if (item.id === candidate.id) {
+        item = candidate;
+      }
+      return item;
+    });
+    setCandidates(updatedList);
+  };
 
   function callElectionListApi(event) {
     let state = event.target.value;

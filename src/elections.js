@@ -62,10 +62,12 @@ const Elections = () => {
     }
   }
 
-  function deleteElectionDetail(id) {
+  async function deleteElectionDetail(id) {
     let url = "http://localhost:8080/electionDetail/" + id;
-    restCall(url, "DELETE", null);
-    removeItem(id);
+    const res = await restCall(url, "DELETE", null);
+    if (res.isSuccess) {
+      removeItem(id);
+    }
   }
 
   const removeItem = (id) => {
@@ -73,24 +75,25 @@ const Elections = () => {
     setElections(updatedList);
   };
 
-  function restCall(url, httpMethod, data) {
+  async function restCall(url, httpMethod, data) {
     const requestOptions = {
       method: httpMethod,
       headers: { "Content-Type": "application/json" },
       body: data == null ? null : JSON.stringify(data),
     };
-    fetch(url, requestOptions)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        alert(data.message);
-      })
-      .catch((error) => {
-        console.error("Error fetching photos:", error);
-      });
+    try {
+      const response = await fetch(url, requestOptions);
+      const data_1 = await response.json();
+      console.log(data_1);
+      alert(data_1.message);
+      return data_1;
+    } catch (error) {
+      console.error("Error fetching party list:", error);
+    }
+    return null;
   }
 
-  function handleAddElection(e) {
+  async function handleAddElection(e) {
     e.preventDefault();
     if (
       electionForm.electionType === "" ||
@@ -104,12 +107,28 @@ const Elections = () => {
     let url = "http://localhost:8080/electionDetail";
     console.log("Payload:", electionForm);
     console.log("requestType: ", requestType);
-    restCall(url, requestType, electionForm);
+    const response = await restCall(url, requestType, electionForm);
     document.getElementById("add-election-form").reset();
-    document
-      .getElementById("addElectionModal")
-      .setAttribute("data-dismiss", "modal");
+    if (response.isSuccess) {
+      if (requestType === "POST") {
+        console.log(response.result);
+        setElections((prev) => [...prev, response.result]);
+      } else {
+        console.log("updating the record: ", response.result);
+        updateItem(response.result);
+      }
+    }
   }
+
+  const updateItem = (el) => {
+    const updatedList = elections.map((item) => {
+      if (item.id === el.id) {
+        item = el;
+      }
+      return item;
+    });
+    setElections(updatedList);
+  };
 
   useEffect(() => {
     var url = "http://localhost:8080/states";
@@ -216,7 +235,7 @@ const Elections = () => {
                   className="form-control"
                   id="electionType"
                   name="electionType"
-                  defaultValue={electionTypeList[0]}
+                  //defaultValue={electionTypeList[0]}
                   onChange={handleChange}
                 >
                   <option key="-1" value="">
