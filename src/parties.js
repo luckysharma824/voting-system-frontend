@@ -114,7 +114,7 @@ const Parties = () => {
           <tr>
             <td>Party Name</td>
             <td>Symbol</td>
-            <td>Status</td>
+            <td>Active</td>
             <td>Edit</td>
             <td>Delete</td>
           </tr>

@@ -71,7 +71,9 @@ const Elections = () => {
   }
 
   const removeItem = (id) => {
+    console.log("deleting id:", id);
     const updatedList = elections.filter((item) => item.id !== id);
+    console.log("After delete: ", id);
     setElections(updatedList);
   };
 
@@ -102,7 +104,7 @@ const Elections = () => {
       electionForm.electionType = electionTypeList[0];
     }
     if (electionForm.state === "" || electionForm.state === null) {
-      electionForm.state = stateList[0];
+      electionForm.state = stateList[0]?.name;
     }
     let url = "http://localhost:8080/electionDetail";
     console.log("Payload:", electionForm);
@@ -155,8 +157,8 @@ const Elections = () => {
           --Please choose state--
         </option>
         {stateList.map((st, index) => (
-          <option key={index} value={st}>
-            {st}
+          <option key={index} value={st.name}>
+            {st.name}
           </option>
         ))}
       </select>
@@ -165,7 +167,7 @@ const Elections = () => {
           <tr>
             <td>Election Type</td>
             <td>Election State</td>
-            <td>Status</td>
+            <td>Active</td>
             <td>Edit</td>
             <td>Delete</td>
           </tr>
@@ -255,15 +257,15 @@ const Elections = () => {
                   className="form-control"
                   id="state"
                   name="state"
-                  defaultValue={stateList[0]}
+                  defaultValue={stateList[0]?.name}
                   onChange={handleChange}
                 >
                   <option key="-1" value="">
                     --Please Choose State--
                   </option>
                   {stateList.map((st, index) => (
-                    <option key={index} value={st}>
-                      {st}
+                    <option key={index} value={st.name}>
+                      {st.name}
                     </option>
                   ))}
                 </select>

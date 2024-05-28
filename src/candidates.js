@@ -97,6 +97,7 @@ const Candidates = () => {
   }
 
   const removeItem = (id) => {
+    console.log("deleting id: ", id);
     const updatedList = candidates.filter((item) => item.id !== id);
     setCandidates(updatedList);
   };
@@ -177,8 +178,8 @@ const Candidates = () => {
           --Please Choose State--
         </option>
         {stateList.map((st, index) => (
-          <option key={index} value={st}>
-            {st}
+          <option key={index} value={st.name}>
+            {st.name}
           </option>
         ))}
       </select>
@@ -289,8 +290,8 @@ const Candidates = () => {
                 >
                   <option value={""}>--Please Choose State--</option>
                   {stateList.map((st, index) => (
-                    <option key={index} value={st}>
-                      {st}
+                    <option key={index} value={st.name}>
+                      {st.name}
                     </option>
                   ))}
                 </select>
